@@ -1,0 +1,30 @@
+CREATE TABLE `daily_price` (
+	`stock_id` varchar(10),
+	`stock_name`	varchar ( 100 ),
+	`volume`	int,
+	`tx_records`	int,
+	`tx_money`	float,
+	`open`	float,
+	`high`	float,
+	`low`	float,
+	`close`	float,
+	`dev`	varchar ( 10 ),
+	`dev_percent`	float,
+	`final_buy_price`	float,
+	`final_buy_quantity`	int,
+	`final_sell_price`	float,
+	`final_sell_quantity`	int,
+	`pe_ratio`	float,
+	`deal_date`	varchar ( 10 ),
+	PRIMARY KEY(`stock_id`,`price_datetime`)
+);
+
+CREATE TABLE `daily_three` (
+    stock_id  varchar(10),
+    deal_date varchar(10),
+	three_net float,
+	for_net float,
+	trust_net float,
+	deal_net float,
+	primary key(stock_id, deal_date)
+);
