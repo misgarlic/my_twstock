@@ -38,6 +38,7 @@ df = pd.read_csv(StringIO("\n".join([i.translate({ord(c): None for c in ' '})
                                      if len(i.split('",')) == 17 and i[0] != '='])), header=0)
 df = df.iloc[:, :-1]
 df['deal_date'] = datestr_format
+df = df.astype(str).apply(lambda s: s.str.replace(',',''))
 df.columns = ["stock_id","stock_name","volume","tx_records","tx_money","open","high","low","close","dev","dev_percent","final_buy_price","final_buy_quantity","final_sell_price","final_sell_quantity","pe_ratio","deal_date"]
 cnx = sqlite3.connect('twstock.db')
 df.to_sql("daily_price",con = cnx,index=False,if_exists='append',index_label=False)

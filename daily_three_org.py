@@ -1,4 +1,4 @@
-
+#-*- coding=utf-8 -*-
 # 讀入一些package
 import sqlite3
 import os

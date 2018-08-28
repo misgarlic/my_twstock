@@ -1,7 +1,11 @@
+#-*- coding=utf-8 -*-
 import pandas as pd
 import sqlite3
 import talib
 import numpy as np
+from datetime import datetime
+from datetime import date
+import sys
 
 def Get_kd_ma(data):
     indicators={}
@@ -12,13 +16,12 @@ def Get_kd_ma(data):
     indicators['k'] = tmp['kdj_k']
     indicators['d'] = tmp['kdj_d']
 
-    indicators['ma1']=data['close'].rolling(MA[0]).mean()
-    indicators['ma2']=data['close'].rolling(MA[1]).mean()
-    indicators['ma3']=data['close'].rolling(MA[2]).mean()
-    indicators['ma4']=data['close'].rolling(MA[3]).mean()
-    indicators['ma5']=data['close'].rolling(MA[4]).mean()
+    indicators['ma5']=data['close'].rolling(MA[0]).mean()
+    indicators['ma10']=data['close'].rolling(MA[1]).mean()
+    indicators['ma20']=data['close'].rolling(MA[2]).mean()
+    indicators['ma30']=data['close'].rolling(MA[3]).mean()
+    indicators['ma60']=data['close'].rolling(MA[4]).mean()
 
-    indicators['close']=data['close']
     indicators=pd.DataFrame(indicators)
     return indicators
 
@@ -34,14 +37,42 @@ def lm_kdj(df, n,ksgn='close'):
     df['kdj_j'] = 3.0 * df['kdj_k'] - 2.0 * df['kdj_d']
     return df   
 
+## program start here
+if len(sys.argv) > 1:
+    datestr = sys.argv[1]
+else:
+    datestr = '20180801'
+
+if datetime.strptime(datestr,'%Y%m%d').weekday() > 4 :
+    print("not work day")
+    sys.exit()
+
+my_date = datetime.strptime(datestr,'%Y%m%d')
+datestr_format = datetime.strptime(datestr,'%Y%m%d').strftime('%Y-%m-%d')
+
 MA=[5,10,20,30,60,120]     
 stock_id = '2882'
 conn = sqlite3.connect("twstock.db")
 df = pd.read_sql_query("""
-select stock_id, deal_date, open, high, low, close from daily_price where deal_date >= ? and stock_id = ?;
-""", conn, params=['2018-07-01',stock_id])
+select stock_id, deal_date, open, high, low, close from daily_price where deal_date >= ? order by stock_id, deal_date;
+""", conn, params=['2018-06-01'])
 df = df.set_index(['deal_date'])
-kd = Get_kd_ma(df)
+df = df.groupby('stock_id')
 
-#kd = lm_kdj(df,9)
-print(kd.loc[['2018-08-24']])
+cnx = sqlite3.connect('twstock.db')
+
+for stock in df.groups:
+    temp = df.get_group(stock).copy()
+    temp.replace({'--': None}, inplace=True)
+
+    try:
+        kd = Get_kd_ma(temp)
+        kd['deal_date'] = datestr_format
+        #print(kd.loc[[datestr_format]])
+        kd.loc[[datestr_format]].to_sql("daily_ta",con = cnx,index=False,if_exists='append',index_label=False)
+    except:
+        print(temp)
+    finally:
+        pass
+    
+
