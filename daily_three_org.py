@@ -45,7 +45,6 @@ def crawl_legal_person(date):
     # 刪除「證券代號」這個欄位
     df = df.drop(['證券代號'], axis=1)
     df.columns = ["stock_name","for_1_buy","for_1_sell","for_1_net","for_2_buy","for_2_sell","for_2_net","trust_buy","trust_sell","trust_net","deal_net","deal_1_buy","deal_1_sell","deal_1_net","deal_2_buy","deal_2_sell","deal_2_net","three_net","stock_id"]
-    print(df)
     # 設定index
     df['deal_date'] = datestr_format
     df = df.set_index(['stock_id', 'deal_date'])
