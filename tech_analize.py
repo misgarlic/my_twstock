@@ -6,6 +6,7 @@ import numpy as np
 from datetime import datetime
 from datetime import date
 import sys
+import dateutil.relativedelta
 
 def Get_kd_ma(data):
     indicators={}
@@ -48,14 +49,16 @@ if datetime.strptime(datestr,'%Y%m%d').weekday() > 4 :
     sys.exit()
 
 my_date = datetime.strptime(datestr,'%Y%m%d')
+my_date =  my_date + dateutil.relativedelta.relativedelta(months=-3)
 datestr_format = datetime.strptime(datestr,'%Y%m%d').strftime('%Y-%m-%d')
+base_datestr_format = my_date.strftime('%Y-%m-%d')
 
 MA=[5,10,20,30,60,120]     
 stock_id = '2882'
 conn = sqlite3.connect("twstock.db")
 df = pd.read_sql_query("""
 select stock_id, deal_date, open, high, low, close from daily_price where deal_date >= ? order by stock_id, deal_date;
-""", conn, params=['2018-06-01'])
+""", conn, params=[base_datestr_format])
 df = df.set_index(['deal_date'])
 df = df.groupby('stock_id')
 

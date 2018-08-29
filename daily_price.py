@@ -7,6 +7,7 @@ import os.path
 import sqlite3 
 from datetime import datetime
 import sys
+import dateutil.relativedelta
 
 datestr = None
 if len(sys.argv) > 1:
@@ -40,5 +41,19 @@ df = df.iloc[:, :-1]
 df['deal_date'] = datestr_format
 df = df.astype(str).apply(lambda s: s.str.replace(',',''))
 df.columns = ["stock_id","stock_name","volume","tx_records","tx_money","open","high","low","close","dev","dev_percent","final_buy_price","final_buy_quantity","final_sell_price","final_sell_quantity","pe_ratio","deal_date"]
+cnx = sqlite3.connect('twstock.db')
+df.to_sql("daily_price",con = cnx,index=False,if_exists='append',index_label=False)
+
+#="0050" and ="0056"
+my_etf = ''
+for line in txt.split('\n'):
+    if line.startswith('="0050"') or line.startswith('="0056"'):
+        my_etf = my_etf + line.replace('=','') + '\n'
+
+df = pd.read_csv(StringIO(my_etf),dtype=str,header=None)
+df = df.iloc[:, :-1]
+df['deal_date'] = datestr_format
+df.columns = ["stock_id","stock_name","volume","tx_records","tx_money","open","high","low","close","dev","dev_percent","final_buy_price","final_buy_quantity","final_sell_price","final_sell_quantity","pe_ratio","deal_date"]
+df = df.astype(str).apply(lambda s: s.str.replace(',',''))
 cnx = sqlite3.connect('twstock.db')
 df.to_sql("daily_price",con = cnx,index=False,if_exists='append',index_label=False)
